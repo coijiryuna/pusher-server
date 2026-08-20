@@ -1,0 +1,32 @@
+# node_modules
+node_modules/
+frontend
+frontend/node_modules/
+
+# Build output
+dashboard/assets/
+dashboard/index.html
+
+# Config
+config.json
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Coverage
+coverage/

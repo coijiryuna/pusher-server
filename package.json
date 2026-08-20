@@ -1,0 +1,53 @@
+{
+  "name": "pusher-server",
+  "version": "1.0.0",
+  "description": "Multi-app Pusher compatible WebSocket server.",
+  "main": "index.js",
+  "scripts": {
+    "start": "concurrently \"node index.js\" \"node server.js\" --names \"soketi,admin\" -c \"blue,green\"",
+    "dev": "concurrently \"nodemon index.js\" \"nodemon server.js\" --names \"soketi,admin\" -c \"blue,green\"",
+    "soketi": "node index.js",
+    "dashboard": "node server.js",
+    "dashboard:dev": "nodemon server.js",
+    "build:fe": "if [ -d frontend ]; then cd frontend && npx vite build; else echo 'frontend/ not found, skipping Vite build'; fi",
+    "dev:fe": "cd frontend && npx vite --base=/",
+    "build": "npm run build:fe",
+    "prestart": "npm run build"
+  },
+  "homepage": "https://github.com/CoijiRyuna/pusherserver",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/CoijiRyuna/pusherserver.git"
+  },
+  "bugs": {
+    "url": "https://github.com/CoijiRyuna/pusherserver/issues"
+  },
+  "keywords": [
+    "pusher",
+    "soketi",
+    "socket",
+    "server",
+    "messaging",
+    "realtime",
+    "websocket"
+  ],
+  "author": "CoijiRyuna",
+  "license": "MIT",
+  "dependencies": {
+    "@soketi/soketi": "^1.6.1",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.3",
+    "mysql2": "^3.9.0",
+    "pusher": "^5.3.4",
+    "qrcode": "^1.5.4",
+    "speakeasy": "^2.0.0",
+    "uWebSockets.js": "github:uNetworking/uWebSockets.js#v20.69.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "nodemon": "^3.1.0"
+  }
+}
