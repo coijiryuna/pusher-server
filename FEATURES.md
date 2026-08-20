@@ -1,6 +1,6 @@
 # Fitur Pusher Admin Dashboard
 
-## ✅ Sudah
+## ✅ Done
 - [x] Auth register/login (JWT + bcrypt)
 - [x] CRUD apps per user
 - [x] Filter data berdasarkan user login
