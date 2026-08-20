@@ -31,10 +31,9 @@ Multi-app Pusher-compatible WebSocket server (Soketi) dengan admin dashboard ber
 ### 1. Clone & install
 
 ```bash
-git clone https://github.com/CoijiRyuna/pusherserver.git
-cd pusherserver
+git clone https://github.com/coijiryuna/pusher-server.git
+cd pusher-server
 npm install
-cd frontend && npm install && cd ..
 ```
 
 ### 2. Database
