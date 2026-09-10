@@ -120,39 +120,96 @@ Dokumentasi lengkap tersedia di dashboard setelah login → **Dokumentasi API**.
 ## MGINX
 
 ```
-# API backend — Express (server.js port 9000)
-server {
-    listen 443 ssl http2;
-    server_name wspush.your-domain.my.id;
+server
+{
+    listen 80;
+    listen [::]:80;
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    server_name push.baznastangerangkab.or.id;
+    index index.html index.htm default.htm default.html;
+    # root /home/www/pusher-server;
+    
+    #SSL-START SSL related configuration
+    #error_page 404/404.html;
+    ssl_certificate    /www/server/panel/vhost/cert/pusherserver/fullchain.pem;
+    ssl_certificate_key    /www/server/panel/vhost/cert/pusherserver/privkey.pem;
+    ssl_protocols TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers EECDH+CHACHA20:EECDH+CHACHA20-draft:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;
+    ssl_prefer_server_ciphers on;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 10m;
+    add_header Strict-Transport-Security "max-age=31536000";
+    error_page 497  https://$host$request_uri;
+    #SSL-END
+    
+    #ERROR-PAGE-START  Error page related configuration
+    #error_page 404 /404.html;
+    #error_page 502 /502.html;
+    #ERROR-PAGE-END
+    
+    
+    #REWRITE-START Pseudo-static related configuration
+    include /www/server/panel/vhost/rewrite/node_pusherserver.conf;
+    #REWRITE-END
+    
+    #Files or directories forbidden to access
+    location ~ ^/(\.user.ini|\.htaccess|\.git|\.svn|\.project|LICENSE|README.md|package.json|package-lock.json|\.env|node_modules) {
+        return 404;
+    }
+    
+    #One-click application for SSL certificate verification directory related settings
+    location /.well-known/ {
+        root  /home/www/pusher-server;
+    }
 
-    # SSL cert (Let's Encrypt buat wspush.your-domain.my.id)
+    # HTTP reverse proxy related settings begin. You can make proxy cache settings here.>>>
+    #location ~ /purge(/.*) {
+    #    proxy_cache_purge cache_one $host$request_uri$is_args$args;
+    #}
+    
+    location = / {
+        return 302 /dashboard/;
+    }
 
-    location /api {
+     # ── WebSocket (Soketi) ───────────────────────────────────────
+    # all paths that begin with /app/ are handled by Soketi
+    location ^~ / {
+        proxy_pass http://127.0.0.1:3090;          # Soketi internal HTTP + WS port
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400s;
+        proxy_send_timeout 30s;
+    }
+
+    # ── API (Express) ───────────────────────────────────────────
+    location ^~ /api/ {
         proxy_pass http://127.0.0.1:9000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
-}
 
-# WebSocket — Soketi (port 3090)
-server {
-    listen 443 ssl http2;
-    server_name wspush.your-domain.my.id;
-
-    # SSL cert buat wspush.your-domain.my.id
-
-    location / {
-        proxy_pass http://127.0.0.1:3090;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade $http_upgrade;
-        proxy_set_header Connection "upgrade";
+    # ── Dashboard (static files served by Express) ─────────────
+    # everything else (/, /dashboard/*, assets, etc.) goes to Express
+    location ^~ /dashboard/ {
+        proxy_pass http://127.0.0.1:9000;
         proxy_set_header Host $host;
-        proxy_read_timeout 3600s;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
+    # End of HTTP reverse proxy related settings <<<
+    
+    access_log  /www/wwwlogs/pusherserver.log;
+    error_log  /www/wwwlogs/pusherserver.error.log;
 }
-
 ```
 
 ## License
