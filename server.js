@@ -97,46 +97,46 @@ async function audit(userId, action, target, detail) {
 }
 
 // POST /api/register
-app.post("/api/register", async (req, res) => {
-  const { username, password, email } = req.body;
-  if (!username || !password || !email)
-    return res
-      .status(400)
-      .json({ error: "username, password, dan email wajib diisi" });
-  if (username.length < 3)
-    return res.status(400).json({ error: "Username minimal 3 karakter" });
-  if (password.length < 6)
-    return res.status(400).json({ error: "Password minimal 6 karakter" });
+// app.post("/api/register", async (req, res) => {
+//   const { username, password, email } = req.body;
+//   if (!username || !password || !email)
+//     return res
+//       .status(400)
+//       .json({ error: "username, password, dan email wajib diisi" });
+//   if (username.length < 3)
+//     return res.status(400).json({ error: "Username minimal 3 karakter" });
+//   if (password.length < 6)
+//     return res.status(400).json({ error: "Password minimal 6 karakter" });
 
-  try {
-    const p = getPool();
-    if (!p) return res.status(503).json({ error: "Database tidak tersedia" });
-    const hash = await bcrypt.hash(password, 10);
-    const [result] = await p.query(
-      "INSERT INTO user (username, password, email, role) VALUES (?, ?, ?, ?)",
-      [username, hash, email, "operator"],
-    );
-    const token = jwt.sign(
-      { id: result.insertId, username, email, role: "operator" },
-      JWT_SECRET,
-      { expiresIn: "7d" },
-    );
-    await audit(result.insertId, "register", username, "User baru mendaftar");
-    res
-      .status(201)
-      .json({
-        ok: true,
-        token,
-        user: { id: result.insertId, username, email, role: "operator" },
-      });
-  } catch (err) {
-    if (err.code === "ER_DUP_ENTRY")
-      return res
-        .status(409)
-        .json({ error: "Username atau email sudah terdaftar" });
-    res.status(500).json({ error: err.message });
-  }
-});
+//   try {
+//     const p = getPool();
+//     if (!p) return res.status(503).json({ error: "Database tidak tersedia" });
+//     const hash = await bcrypt.hash(password, 10);
+//     const [result] = await p.query(
+//       "INSERT INTO user (username, password, email, role) VALUES (?, ?, ?, ?)",
+//       [username, hash, email, "operator"],
+//     );
+//     const token = jwt.sign(
+//       { id: result.insertId, username, email, role: "operator" },
+//       JWT_SECRET,
+//       { expiresIn: "7d" },
+//     );
+//     await audit(result.insertId, "register", username, "User baru mendaftar");
+//     res
+//       .status(201)
+//       .json({
+//         ok: true,
+//         token,
+//         user: { id: result.insertId, username, email, role: "operator" },
+//       });
+//   } catch (err) {
+//     if (err.code === "ER_DUP_ENTRY")
+//       return res
+//         .status(409)
+//         .json({ error: "Username atau email sudah terdaftar" });
+//     res.status(500).json({ error: err.message });
+//   }
+// });
 
 // POST /api/login
 app.post("/api/login", async (req, res) => {
